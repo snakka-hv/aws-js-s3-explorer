@@ -313,7 +313,7 @@ function ViewController($scope, SharedService) {
             // URL and download it in new window/tab
             const s3 = new AWS.S3();
             const params = {
-                Bucket: $scope.view.settings.bucket, Key: target.dataset.s3key, Expires: 15,
+                Bucket: $scope.view.settings.bucket, Key: target.dataset.s3key, Expires: 10000,
             };
             DEBUG.log('params:', params);
             s3.getSignedUrl('getObject', params, (err, url) => {
@@ -322,7 +322,14 @@ function ViewController($scope, SharedService) {
                     SharedService.showError(params, err);
                 } else {
                     DEBUG.log('url:', url);
-                    window.open(url, '_blank');
+                    let fileNameSplit = params.Key.split('/');
+                    let fileName = fileNameSplit[fileNameSplit.length - 1];
+                    const wgetUrl = "wget '" + url + "' -O " + fileName;
+                    $('#wgetUrl').text(wgetUrl);
+                    $('#WgetModal').modal('show');
+
+                    // alert(wgetUrl);
+                    // window.open(url, '_blank');
                 }
             });
         }
@@ -1478,4 +1485,6 @@ $(document).ready(() => {
     // launch the initial Settings dialog requesting bucket & credentials.
     moment().format();
     $('#SettingsModal').modal({ keyboard: true, backdrop: 'static' });
+    $('#WgetModal').modal({ keyboard: true, backdrop: 'static' });
+    $('#WgetModal').modal('hide');
 });
